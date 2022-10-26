@@ -1,0 +1,35 @@
+http:
+  # Add the router
+  routers:
+    app:
+      entryPoints:
+      - http
+      middlewares:
+      - my-basic-auth
+      - api-prefix
+      service: service-foo
+      rule: "Host(`localhost`) || PathPrefix(`/api/v1`)"
+
+  # Add the middleware
+  middlewares:
+    my-basic-auth:
+      basicAuth:
+        users:
+        - peter:$apr1$WvrzhIRC$DsrMwXmFZ07R5WAeeuzqM1
+    api-prefix:
+      stripprefix:
+        prefixes:
+          - "/api/v1"
+
+
+  # Add the service
+  services:
+    service-foo:
+      loadBalancer:
+        servers:
+        - url: http://app:8000/
+        passHostHeader: true
+        sticky:
+          cookie:
+            name: foo_cookie
+            httpOnly: true
